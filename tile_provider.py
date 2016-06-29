@@ -24,7 +24,7 @@ class MapboxTileProvider (TileProvider):
             x = x,
             y = y)
 
-        uri = "http://127.0.0.1:8080/fmq-mapbox/{z}/{x}/{y}.png".format (z = z, x = x, y = y)
+        # uri = "http://127.0.0.1:8080/fmq-mapbox/{z}/{x}/{y}.png".format (z = z, x = x, y = y)
 
         return uri
 
