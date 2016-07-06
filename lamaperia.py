@@ -9,31 +9,30 @@ import argparse
 import math
 import cairo
 import json
+import config
 from units import *
 from parsedegrees import *
 import maplayout
 import chartgeometry
-
-mapbox_access_params = {
-    'access_token' : 'pk.eyJ1IjoiZmVkZXJpY29tZW5hcXVpbnRlcm8iLCJhIjoiUEZBcTFXQSJ9.o19HFGnk0t3FgitV7wMZfQ',
-    'username'     : 'federicomenaquintero',
-    'style_id'     : 'cil44s8ep000c9jm18x074iwv'
-}
+from wizard import config_wizard
 
 ####################################################################
 
-def jsonfile(string):
-    if not os.path.isfile(string):
-        msg = "{} file does not exist".format(string)
-        raise argparse.ArgumentTypeError(msg)
+def jsonfile (filename):
     try:
-        data = json.load(open(string))
+        file = open (filename)
+    except IOError as e:
+        raise argparse.ArgumentTypeError ("can't open '{0}': {1}".format (filename, e))
+
+    try:
+        data = json.load (open (filename))
     except ValueError as e:
-        msg = "{} file is not valid json".format(string)
-        raise argparse.ArgumentTypeError(msg)
+        msg = "file {0} is not valid JSON: {1}".format (filename, e.args[0])
+        raise argparse.ArgumentTypeError (msg)
+
     return data
 
-def main ():
+def main (config_data):
     parser = argparse.ArgumentParser (description = "Makes a PDF or SVG map from Mapbox tiles.")
 
     parser.add_argument ("--config", type = jsonfile, required = True, metavar = "JSON-FILENAME")
@@ -44,11 +43,11 @@ def main ():
 
     json_config = args.config
     map_layout = maplayout.MapLayout ()
-    map_layout.parse_json (json_config)
+    map_layout.load_from_json (json_config)
 
-    provider = tile_provider.MapboxTileProvider (mapbox_access_params["access_token"],
-                                                 mapbox_access_params["username"],
-                                                 mapbox_access_params["style_id"])
+    provider_classname = '{}TileProvider'.format (config_data['provider'])
+    provider_class = getattr (tile_provider, provider_classname)
+    provider = provider_class (config_data)
 
     geometry = chartgeometry.ChartGeometry (map_layout, provider)
 
@@ -65,4 +64,19 @@ def main ():
     paper_renderer.render (args.format, args.output, chart_renderer)
 
 if __name__ == "__main__":
-    main ()
+    try:
+        config_data = config.config_load ()
+    except IOError as e:
+        print ("La Mapería is not configured yet.")
+        answ = input ("Would you like to configure La Mapería right now? [Y/n] ").lower ()
+        if answ.startswith ('y') or not answ:
+            config_data = config_wizard ()
+        else:
+            print ("I'm not smart enough to work without a configuration.  Exiting...")
+            exit (1)
+    except ValueError as e:
+        print ("The configuration in {} is not valid: {}".format (config.config_get_configuration_filename (),
+                                                                  e.args[0]))
+        exit (1)
+
+    main (config_data)
