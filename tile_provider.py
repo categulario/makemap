@@ -57,7 +57,7 @@ class MapboxTileProvider (TileProvider):
 class TileStacheTileProvider (MapboxTileProvider):
 
     def get_uri_for_tile (self, z, x, y):
-        uri = "http://{host}:{port}/fmq-mapbox/{z}/{x}/{y}.png".format (
+        uri = "http://{host}:{port}/sandwiches/{z}/{x}/{y}.png".format (
             host = self.config['tilestache_host'],
             port = self.config['tilestache_port'],
             z = z,
