@@ -1,6 +1,6 @@
 # Cómo renderear la cuadrícula UTM sin morir en el intento
 
-De este branch, tomar el [tilestache/config.cfg](https://github.com/categulario/makemap/blob/master/tilestache/tilestache-mapbox.cfg)
+De este branch, tomar el [tilestache/config.cfg](https://github.com/categulario/makemap/blob/master/tilestache/config.cfg)
 
 Tuve que modificar la [línea 60 del tile provider](https://github.com/categulario/makemap/blob/feature/use-tilestache-layers/tile_provider.py#L60) creo que de todas formas es buena idea dejar el valor de la capa de tilestache en algo genérico para que después la decisión de las capas a usar se haga en el `tilestache.cfg`. La otra opción es poder configurar la capa de tilestache en tiempo de ejecución con una bandera o algo.
 
